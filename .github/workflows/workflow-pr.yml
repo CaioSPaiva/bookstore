@@ -1,31 +1,35 @@
-name: Python Pull Request Workflow
+name: Django CI
 
 on: [push]
 
 jobs:
   qa:
-    name: Quality check
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.13
 
       - name: Install Poetry
         run: pip install poetry
 
       - name: Install dependencies
-        run: poetry install
+        run: |
+          poetry config virtualenvs.create false
+          poetry install
+
+      - name: Set environment variables
+        run: echo "SECRET_KEY=test" >> $GITHUB_ENV
 
       - name: Run migrations
-        run: poetry run python manage.py migrate
+        run: python manage.py migrate
 
       - name: Run tests
-        run: poetry run python manage.py test
+        run: python manage.py test
 
       - name: Wemake Python Styleguide
         uses: wemake-services/wemake-python-styleguide@0.16.0
